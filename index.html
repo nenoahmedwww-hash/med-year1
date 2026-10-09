@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة طب بشري مصر | EgyMed Year 1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0A84FF;
+            --primary-dark: #0056B3;
+            --secondary: #004080;
+            --bg-light: #F4F7FA;
+            --card-bg: #FFFFFF;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+            --success: #10B981;
+            --danger: #EF4444;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode {
+            --bg-light: #0F172A;
+            --card-bg: #1E293B;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --border-color: #334155;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+        }
+
+        /* الهيدر وشريط الملاحة */
+        header {
+            background: linear-gradient(135deg, var(--secondary), var(--primary-dark));
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .logo h1 { margin: 0; font-size: 1.6rem; font-weight: 800; }
+        .logo p { margin: 0; font-size: 0.85rem; opacity: 0.8; }
+
+        .header-actions { display: flex; gap: 15px; align-items: center; }
+
+        .theme-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        nav {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        nav button.active, nav button:hover {
+            background-color: rgba(10, 132, 255, 0.1);
+            color: var(--primary);
+        }
+
+        /* الحاوية الرئيسية */
+        .container {
+            max-width: 1100px;
+            margin: 25px auto;
+            padding: 0 20px;
+        }
+
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* شبكة المواد والملخصات */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card h3 { margin-top: 0; color: var(--primary); font-size: 1.2rem; }
+        .card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover { background-color: var(--primary-dark); }
+
+        /* النافذة المنبثقة لعرض الملخص الشامل */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal-content {
+            background: var(--card-bg);
+            width: 90%;
+            max-width: 850px;
+            max-height: 85vh;
+            border-radius: 12px;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px; left: 20px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .summary-img {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        table, th, td { border: 1px solid var(--border-color); }
+        th, td { padding: 10px; text-align: right; }
+        th { background-color: rgba(10, 132, 255, 0.1); color: var(--primary); }
+
+        /* نظام MCQ */
+        .mcq-box {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+
+        .opt-btn {
+            display: block;
+            width: 100%;
+            text-align: right;
+            padding: 12px;
+            margin: 8px 0;
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .opt-btn.correct { background: var(--success) !important; color: white !important; }
+        .opt-btn.wrong { background: var(--danger) !important; color: white !important; }
+
+        /* Flashcards */
+        .flashcard {
+            width: 100%;
+            max-width: 450px;
+            height: 220px;
+            margin: 20px auto;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .flashcard-inner {
+            position: relative;
+            width: 100%; height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+
+        .front, .back {
+            position: absolute;
+            width: 100%; height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .front { background: var(--primary); color: white; }
+        .back { background: var(--secondary); color: white; transform: rotateY(180deg); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <h1>EgyMed Year 1 🩺</h1>
+            <p>منصة طلاب كلية الطب بشري - السنة الأولى بمصر</p>
+        </div>
+        <div class="header-actions">
+            <button class="theme-btn" onclick="toggleTheme()">🌙 النمط الليلي/النهاري</button>
+        </div>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" onclick="switchTab('lectures')">📚 المحاضرات والملخصات</button>
+        <button class="nav-btn" onclick="switchTab('mcq')">📝 بنك أسئلة MCQ</button>
+        <button class="nav-btn" onclick="switchTab('flashcards')">🎴 Flashcards</button>
+    </nav>
+
+    <div class="container">
+
+        <!-- قسم المحاضرات -->
+        <section id="lectures" class="section active">
+            <h2>الموديول التعريفي (Foundation Module)</h2>
+            <div class="grid">
+                
+                <div class="card">
+                    <div>
+                        <h3>Physiology: Cell Membrane Mechanics</h3>
+                        <p>شرح الهيكل التركيبي لغشاء الخلية وآليات النقل الخلوي (Passive & Active Transport).</p>
+                    </div>
+                    <button class="btn-primary" onclick="openSummary('physio')">📖 فتح الملخص والشرائح</button>
+                </div>
+
+                <div class="card">
+                    <div>
+                        <h3>Anatomy: Introduction & Planes</h3>
+                        <p>شرح المستويات التشريحية (Anatomical Planes) والمصطلحات الأساسية للحركة والأوضاع.</p>
+                    </div>
+                    <button class="btn-primary" onclick="openSummary('anatomy')">📖 فتح الملخص والشرائح</button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- قسم MCQ -->
+        <section id="mcq" class="section">
+            <h2>اختبار موديول التشريح ووظائف الأعضاء</h2>
+            <div class="mcq-box">
+                <h3 id="q-text">السؤال سيظهر هنا...</h3>
+                <div id="opts"></div>
+                <p id="feedback" style="font-weight: bold; margin-top: 15px;"></p>
+            </div>
+        </section>
+
+        <!-- قسم Flashcards -->
+        <section id="flashcards" class="section">
+            <h2 style="text-align: center;">بطاقات المراجعة السريعة (Anatomy)</h2>
+            <div class="flashcard" id="fc" onclick="this.classList.toggle('flipped')">
+                <div class="flashcard-inner">
+                    <div class="front" id="fc-q">السؤال؟</div>
+                    <div class="back" id="fc-a">الإجابة!</div>
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <button class="btn-primary" style="width: auto; padding: 10px 30px;" onclick="nextCard()">البطاقة التالية ➔</button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- النافذة المنبثقة للـ Modal Reader -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeSummary()">إغلاق ✖</button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // التبديل بين النمط الليلي والنهاري
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        // التبديل بين الأقسام
+        function switchTab(tabId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // محتوى الملخصات التفاعلية
+        const summaries = {
+            physio: `
+                <h2>📖 Physiology — Cell Membrane & Transport</h2>
+                <hr>
+                <img class="summary-img" src="https://images.unsplash.com/photo-1530026405186-ed1f139313f8?auto=format&fit=crop&w=800&q=80" alt="Cell Membrane">
+                <h3>1. Fluid Mosaic Model</h3>
+                <p>يتكون غشاء الخلية من طبقة ثنائية من الدهون الفسفورية (Phospholipid Bilayer) تحتوي على بروتينات مدمجة وسطحية.</p>
+                
+                <h3>2. مقارنة طرق النقل (Transport Systems)</h3>
+                <table>
+                    <tr>
+                        <th>وجه المقارنة</th>
+                        <th>Passive Transport</th>
+                        <th>Active Transport</th>
+                    </tr>
+                    <tr>
+                        <td>استهلاك الطاقة (ATP)</td>
+                        <td>لا يحتاج (0 ATP)</td>
+                        <td>يحتاج طاقة مباشرة أو غير مباشرة</td>
+                    </tr>
+                    <tr>
+                        <td>اتجاه النقل</td>
+                        <td>مع الانحدار (High ➔ Low)</td>
+                        <td>ضد الانحدار (Low ➔ High)</td>
+                    </tr>
+                </table>
+            `,
+            anatomy: `
+                <h2>📖 Anatomy — Anatomical Planes</h2>
+                <hr>
+                <img class="summary-img" src="https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&w=800&q=80" alt="Anatomy">
+                <h3>المستويات التشريحية الأساسية:</h3>
+                <ul>
+                    <li><b>Median Plane:</b> يقسم الجسم لنصفين متساويين (أيمن وأيسر).</li>
+                    <li><b>Coronal Plane:</b> يقسم الجسم لجزء أمامي (Anterior) وجزء خلفي (Posterior).</li>
+                    <li><b>Transverse Plane:</b> يقسم الجسم لجزء علوي (Superior) وجزء سفلي (Inferior).</li>
+                </ul>
+            `
+        };
+
+        function openSummary(id) {
+            document.getElementById('modal-body').innerHTML = summaries[id];
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeSummary() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // بيانات MCQ
+        const mcq = {
+            q: "Which of the following transport mechanisms requires direct ATP consumption?",
+            opts: ["Simple Diffusion", "Facilitated Diffusion", "Primary Active Transport", "Osmosis"],
+            ans: 2
+        };
+
+        function initMCQ() {
+            document.getElementById('q-text').innerText = mcq.q;
+            const container = document.getElementById('opts');
+            container.innerHTML = '';
+            mcq.opts.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'opt-btn';
+                btn.innerText = opt;
+                btn.onclick = () => {
+                    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+                    if(idx === mcq.ans) {
+                        btn.classList.add('correct');
+                        document.getElementById('feedback').innerText = "✅ إجابة صحيحة!";
+                        document.getElementById('feedback').style.color = "var(--success)";
+                    } else {
+                        btn.classList.add('wrong');
+                        document.getElementById('feedback').innerText = "❌ إجابة خاطئة، الإجابة الصحيحة هي Primary Active Transport.";
+                        document.getElementById('feedback').style.color = "var(--danger)";
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        // بيانات Flashcards
+        const cards = [
+            { q: "ما هي عظمة الفخذ باللغة الطبية؟", a: "Femur" },
+            { q: "ما هو الإنزيم الرئيسي لهضم الدهون؟", a: "Lipase" }
+        ];
+        let cIdx = 0;
+
+        function updateCard() {
+            document.getElementById('fc').classList.remove('flipped');
+            setTimeout(() => {
+                document.getElementById('fc-q').innerText = cards[cIdx].q;
+                document.getElementById('fc-a').innerText = cards[cIdx].a;
+            }, 200);
+        }
+
+        function nextCard() {
+            cIdx = (cIdx + 1) % cards.length;
+            updateCard();
+        }
+
+        initMCQ();
+        updateCard();
+    </script>
+</body>
+</html>
